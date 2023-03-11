@@ -1,1 +1,10 @@
-[]
+[
+    {
+        "message": "moin moin",
+        "timestamp": "10:23",
+        "color": "#FF0000",
+        "bot": false,
+        "command": false,
+        "index": 0
+    }
+]

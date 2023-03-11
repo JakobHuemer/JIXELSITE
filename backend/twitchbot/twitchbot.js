@@ -36,7 +36,7 @@ function addComment(parsedMessage) {
     let isBot = parsedMessage["display-name"] === "jakkibot"
     let isCommand = parsedMessage.parameters.startsWith("!")
 
-    let commentData = JSON.parse(fs.readFileSync('./twitchbot/data/comments.json', 'utf8'));
+    let commentData = JSON.parse(fs.readFileSync('./backend/twitchbot/data/comments.json', 'utf8'));
 
     let comment = {
         author: parsedMessage["display-name"],
@@ -54,7 +54,7 @@ function addComment(parsedMessage) {
         commentData.shift()
     }
 
-    fs.writeFileSync('./twitchbot/data/comments.json', JSON.stringify(commentData, null, 4), 'utf8');
+    fs.writeFileSync('./backend/twitchbot/data/comments.json', JSON.stringify(commentData, null, 4), 'utf8');
 
 }
 
