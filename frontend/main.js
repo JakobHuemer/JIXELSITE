@@ -83,7 +83,7 @@ async function loadComments() {
     });
 //     Handling lreq
 
-    lastLocalIndex = localComments[localComments.length - 1].index || 0
+    lastLocalIndex = lreq[lreq.length - 1].index || 0
 
     addComments(lreq)
 }
