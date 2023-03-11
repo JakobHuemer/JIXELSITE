@@ -3,7 +3,7 @@ import './style.scss'
 let tempDate = new Date();
 let localComments = []
 
-const baseUrl = "http://localhost:3000"
+const baseUrl = "http://139.162.157.52:3000"
 
 let comments = [
     {
