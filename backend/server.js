@@ -23,7 +23,7 @@ function pLog(msg, protocol) {
 }
 
 app.use(express.json());
-app.use(express.static('./backend/dist'));
+app.use("site", express.static('./frontend/dist'));
 
 function getLastComments(boundStart, boundEnd, comments) {
     let viewComments = []
