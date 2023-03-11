@@ -26,6 +26,7 @@ app.use(express.json());
 app.use(express.static('./frontend/dist'));
 
 function getLastComments(boundStart, boundEnd, comments) {
+    pLog(`Getting comments from ${boundStart} to ${boundEnd}\n--------------------\n`, 'getComments');
     let viewComments = []
     for (let i = boundEnd; i > boundStart; i--) {
         viewComments.push(comments.filter(comment => comment.index === i)[0])
