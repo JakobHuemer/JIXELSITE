@@ -38,6 +38,7 @@ function getLastComments(boundStart, boundEnd, comments) {
 app.get("/api/comments/:index", (req, res) => {
     pLog(`GET /api/comments/${req.params.index}`, 'HTTP')
     const { index: siteIndex } = req.params;
+    let comments = loadComments()
 
     let lastIndex = comments[comments.length - 1]?.index || 0;
 
