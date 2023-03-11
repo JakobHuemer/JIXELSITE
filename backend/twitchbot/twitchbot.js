@@ -22,10 +22,10 @@ fs.writeFileSync('./backend/twitchbot/data/comments.json', "[]")
 function sendMsg(msg, connection) {
     connection.sendUTF(`PRIVMSG #${channel} :${msg}`)
     addComment({
-        "display-name": "jakkibot",
         parameters: msg,
         tags: {
-            color: "#FF0000"
+            color: "#FF0000",
+            "display-name": "jakkibot"
         }
     })
 }
@@ -33,14 +33,16 @@ function sendMsg(msg, connection) {
 
 function addComment(parsedMessage) {
     let tempTime = new Date()
-    let isBot = parsedMessage["display-name"] === "jakkibot"
+    let isBot = parsedMessage.tags["display-name"] === "jakkibot"
     let isCommand = parsedMessage.parameters.startsWith("!")
 
     let commentData = JSON.parse(fs.readFileSync('./backend/twitchbot/data/comments.json', 'utf8'));
 
+    console.log(parsedMessage)
+
     let comment = {
-        author: parsedMessage["display-name"],
         message: parsedMessage.parameters,
+        author: parsedMessage.tags["display-name"],
         timestamp: `${tempTime.getHours()}:${tempTime.getMinutes()}`,
         color: parsedMessage.tags.color,
         bot: isBot,
