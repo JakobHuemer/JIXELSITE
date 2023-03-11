@@ -39,7 +39,7 @@ async function loadComments() {
         method: "GET",
     }).then((res) => {
         console.log("COMENTS: ")
-        res.json()
+        JSON.stringify(res.json())
         console.log(res)
     })
 
