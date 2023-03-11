@@ -35,7 +35,8 @@ async function loadComments() {
     console.log("Loading comments")
     let lreq;
 
-    let req = await fetch(baseUrl + "/api/comments/" + lastRemoteIndex, {
+    console.log("Last local index: " + lastLocalIndex)
+    let req = await fetch(baseUrl + "/api/comments/" + lastLocalIndex, {
         method: "GET",
     }).then((res) => {
         console.log("COMENTS: ")
@@ -84,6 +85,6 @@ async function loadComments() {
 //     Handling lreq
 
     lastLocalIndex = lreq[lreq.length - 1].index || 0
-
+    console.log(lreq.body)
     addComments(lreq)
 }
