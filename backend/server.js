@@ -8,7 +8,7 @@ twitchbot()
 function loadComments() {
     try {
         const fs = require('fs');
-        const data = fs.readFileSync('./twitchbot/data/comments.json', 'utf8');
+        const data = fs.readFileSync('./backend/twitchbot/data/comments.json', 'utf8');
         return JSON.parse(data);
     } catch (err) {
         console.error(err)
@@ -21,8 +21,9 @@ function pLog(msg, protocol) {
     let date = new Date().toISOString();
     console.log(`[${date}] ${protocol}: ${msg}`);
 }
+
 app.use(express.json());
-app.use("site", express.static('./frontend/dist'));
+app.use(express.static('./backend/dist'));
 
 function getLastComments(boundStart, boundEnd, comments) {
     let viewComments = []
