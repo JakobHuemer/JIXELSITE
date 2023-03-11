@@ -1,0 +1,16 @@
+{
+  "name": "jixel-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev" : "nodemon ./backend/server.js",
+    "start": "node ./backend/server.js"
+  },
+  "keywords": [],
+  "author": "jakki_",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.21"
+  }
+}
