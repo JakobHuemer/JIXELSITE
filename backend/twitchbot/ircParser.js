@@ -6,6 +6,8 @@
 // Expects the caller to pass a single message. (Remember, the Twitch
 // IRC server may send one or more IRC messages in a single message.)
 
+const {pLog} = require('./twitchbot');
+
 function parseMessage(message) {
 
     let parsedMessage = {  // Contains the component parts.
@@ -232,7 +234,8 @@ function parseCommand(rawCommandComponent) {
         case '372':
         case '375':
         case '376':
-            console.log(`numeric message: ${commandParts[0]}`)
+            // console.log(`numeric message: ${commandParts[0]}`)
+            pLog(`numeric message: ${commandParts[0]}`, 'TW info')
             return null;
         default:
             console.log(`\nUnexpected command: ${commandParts[0]}\n`);

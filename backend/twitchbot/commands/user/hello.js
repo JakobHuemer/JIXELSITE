@@ -8,7 +8,6 @@ module.exports = {
 
     execute(command, conn) {
 
-        console.log("COMMAND FROM HELLO.JS: ", command)
         let channel = command.command.channel
         sendMsg(`Hello @${command.source.nick}!`, conn)
     },

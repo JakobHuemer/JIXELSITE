@@ -2,15 +2,19 @@
   "name": "jixel-site",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./backend/server.js",
   "scripts": {
-    "dev" : "nodemon ./backend/server.js",
-    "start": "node ./backend/server.js"
+    "dev": "nodemon ./backend/server.js",
+    "start": "node ./backend/server.js",
+    "discord": "nodemon ./backend/discordbot/src/index.js"
   },
   "keywords": [],
   "author": "jakki_",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^2.0.21"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
   }
 }

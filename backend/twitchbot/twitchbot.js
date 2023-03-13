@@ -5,23 +5,18 @@ const WebSocketClient = require('websocket').client;
 const client = new WebSocketClient();
 const eventSub = new WebSocketClient()
 const axios = require('axios');
-const express = require('express');
-const app = express();
-const port = 6363;
-app.use(express.json());
 let {channel, clientId, clientSecrete, username, password} = require('./data/userdata.json');
+module.exports = {twitchbot, sendMsg, pLog}
 const {parseMessage, parseTags, parseCommand, parseSource, parseParameters} = require('./ircParser');
 const fs = require("fs");
 
+
 const scopesString = "?scope=analytics:read:extensions+user:edit+user:read:email+clips:edit+bits:read+analytics:read:games+user:edit:broadcast+user:read:broadcast+chat:read+chat:edit+channel:moderate+channel:read:subscriptions+whispers:read+whispers:edit+moderation:read+channel:read:redemptions+channel:edit:commercial+channel:read:hype_train+channel:read:stream_key+channel:manage:extensions+channel:manage:broadcast+user:edit:follows+channel:manage:redemptions+channel:read:editors+channel:manage:videos+user:read:blocked_users+user:manage:blocked_users+user:read:subscriptions+user:read:follows+channel:manage:polls+channel:manage:predictions+channel:read:polls+channel:read:predictions+moderator:manage:automod+channel:manage:schedule+channel:read:goals+moderator:read:automod_settings+moderator:manage:automod_settings+moderator:manage:banned_users+moderator:read:blocked_terms+moderator:manage:blocked_terms+moderator:read:chat_settings+moderator:manage:chat_settings+channel:manage:raids+moderator:manage:announcements+moderator:manage:chat_messages+user:manage:chat_color+channel:manage:moderators+channel:read:vips+channel:manage:vips+user:manage:whispers+channel:read:charity+moderator:read:chatters+moderator:read:shield_mode+moderator:manage:shield_mode+moderator:read:shoutouts+moderator:manage:shoutouts+moderator:read:followers"
-
-// Reset comments.json
-fs.writeFileSync('./backend/twitchbot/data/comments.json', "[]")
-
 
 function sendMsg(msg, connection) {
     connection.sendUTF(`PRIVMSG #${channel} :${msg}`)
-    addComment({
+
+    sendSSE({
         parameters: msg,
         tags: {
             color: "#FF0000",
@@ -31,36 +26,25 @@ function sendMsg(msg, connection) {
 }
 
 
-function addComment(parsedMessage) {
-    let tempTime = new Date()
-    let isBot = parsedMessage.tags["display-name"] === "jakkibot"
-    let isCommand = parsedMessage.parameters.startsWith("!")
+function pLog(msg, protocol) {
+    let date = new Date().toISOString();
+    console.log(`[${date}] ${protocol}: ${msg}`);
+}
 
-    let commentData = JSON.parse(fs.readFileSync('./backend/twitchbot/data/comments.json', 'utf8'));
-
-    console.log(parsedMessage)
-
-    let comment = {
-        message: parsedMessage.parameters,
-        author: parsedMessage.tags["display-name"],
-        timestamp: `${tempTime.getHours()}:${tempTime.getMinutes()}`,
-        color: parsedMessage.tags.color,
-        bot: isBot,
-        command: isCommand,
-        index: commentData[commentData.length - 1]?.index + 1 || 0
-    }
-
-
-    commentData.push(comment)
-    if (commentData.length > 100) {
-        commentData.shift()
-    }
-
-    fs.writeFileSync('./backend/twitchbot/data/comments.json', JSON.stringify(commentData, null, 4), 'utf8');
-
+let sendSSE = function (parsedMessage) {
+    pLog("SSE not connected", "SSE")
 }
 
 function twitchbot() {
+
+    const express = require('express');
+    const app = express();
+    const port = 8411;
+
+
+    app.listen(port, () => {
+        pLog("Twitch bot started on port: " + port, "TWITCH")
+    });
 
 
 // map commands from subfolders from commands folder
@@ -102,7 +86,8 @@ function twitchbot() {
     });
 
     client.on('connect', function (connection) {
-        console.log('WebSocket Client Connected');
+        // console.log('WebSocket Client Connected');
+        pLog("Connected to Twitch IRC", "TWITCH")
 
         // Send CAP (optional), PASS, and NICK messages
         connection.sendUTF("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
@@ -123,7 +108,7 @@ function twitchbot() {
 
             if (ircMessage.type === 'utf8') {
                 let rawIrcMessage = ircMessage.utf8Data.trimEnd();
-                console.log(`Message received (${new Date().toISOString()}): '${rawIrcMessage}'\n`);
+                // console.log(`Message received (${new Date().toISOString()}): '${rawIrcMessage}'\n`);
 
                 let messages = rawIrcMessage.split('\r\n');  // The IRC message may contain one or more messages.
                 messages.forEach(message => {
@@ -139,7 +124,7 @@ function twitchbot() {
                                 // interval for when the bot posts its move message.
                                 let commandMessage = parsedMessage.parameters;
 
-                                addComment(parsedMessage)
+                                sendSSE(parsedMessage)
 
                                 if (commandMessage.startsWith("!")) {
                                     //     Command Handler
@@ -156,10 +141,12 @@ function twitchbot() {
                                             commandObj.help(parsedMessage, connection);
                                         } else {
                                             try {
-                                                console.log(`COMMAND (${new Date().toISOString()}):`, commandObj.name.toUpperCase())
+                                                // console.log(`COMMAND (${new Date().toISOString()}):`, commandObj.name.toUpperCase());
+                                                pLog(`COMMAND executed`, commandObj.name.toUpperCase());
                                                 commandObj.execute(parsedMessage, connection);
                                             } catch (err) {
                                                 console.log("ERR:", err);
+                                                // pLog("ERR: " + err, "ERR");
                                                 connection.sendUTF(`@reply-parent-msg=${parsedMessage.tags.id} PRIVMSG ${channel} :Ups, something went wrong`);
                                             }
 
@@ -188,7 +175,8 @@ function twitchbot() {
                             case
                             'PART'
                             :
-                                console.log('The channel must have banned (/ban) the bot.');
+                                // console.log('The channel must have banned (/ban) the bot.');
+                                pLog('The channel must have banned (/ban) the bot.', "TWITCH");
                                 connection.close();
                                 break;
                             case
@@ -197,10 +185,12 @@ function twitchbot() {
                                 // If the authentication failed, leave the channel.
                                 // The server will close the connection.
                                 if ('Login authentication failed' === parsedMessage.parameters) {
-                                    console.log(`Authentication failed; left ${channel}`);
+                                    // console.log(`Authentication failed; left ${channel}`);
+                                    pLog(`Authentication failed; left ${channel}`, "TWITCH")
                                     connection.sendUTF(`PART ${channel}`);
                                 } else if ('You don’t have permission to perform that action' === parsedMessage.parameters) {
-                                    console.log(`No permission. Check if the access token is still valid. Left ${channel}`);
+                                    // console.log(`No permission. Check if the access token is still valid. Left ${channel}`);
+                                    pLog(`No permission. Check if the access token is still valid. Left ${channel}`, "TWITCH")
                                     connection.sendUTF(`PART ${channel}`);
                                 }
                                 break;
@@ -226,4 +216,3 @@ function twitchbot() {
 
 }
 
-module.exports = {twitchbot, sendMsg}
