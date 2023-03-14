@@ -6,8 +6,8 @@ import escapeHtml from 'escape-html'
 
 // const baseUrl = "http://139.162.157.52:3000"
 // const twitchUrl = "http://139.162.157.52:8411"
-const baseUrl = "http://localhost:3000"
-const twitchUrl = "http://localhost:8411"
+const baseUrl = "http://139.162.157.52:3000"
+const twitchUrl = "http://139.162.157.52:8411"
 let lastLocalIndex = -1
 
 // syncing
