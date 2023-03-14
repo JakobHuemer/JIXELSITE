@@ -97,7 +97,6 @@ function discordBot(applicationId) {
     (async applicationId => {
         try {
             pLog("🟠 Started refreshing application (/) commands.", "SYSTEM C");
-            console.log(process.env.DISCORDJS_APPLICATION_ID)
 
             await rest.put(Routes.applicationCommands(process.env.DISCORDJS_APPLICATION_ID, process.env.DISCORDJS_SERVER_ID), {
                 body: commands,

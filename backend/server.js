@@ -9,17 +9,6 @@ const {twitchbot} = require('./twitchbot/twitchbot');
 const {listen} = require("express/lib/application");
 twitchbot()
 
-function loadComments() {
-    try {
-        const fs = require('fs');
-        const data = fs.readFileSync('./backend/twitchbot/data/comments.json', 'utf8');
-        return JSON.parse(data);
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-let comments = loadComments()
 
 function pLog(msg, protocol) {
     let date = new Date().toISOString();

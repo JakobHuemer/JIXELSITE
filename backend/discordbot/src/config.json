@@ -1,1 +1,7 @@
-{}
+{
+  "twitch": {
+    "twitchchat" : "someid",
+    "category": "category_id",
+    "stream_name": "stream_name"
+  }
+}

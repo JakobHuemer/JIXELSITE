@@ -41,6 +41,36 @@ function twitchbot() {
     const app = express();
     const port = 8411;
 
+    app.get("/comment-sync", (req, res) => {
+        pLog("CONNECTED TO SSE", "TWITCH SSE");
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+
+
+        sendSSE = function (parsedMessage) {
+            let tempTime = new Date().toUTCString()
+            let isBot = parsedMessage.tags["display-name"] === "jakkibot"
+            let isCommand = parsedMessage.parameters.startsWith("!")
+
+
+            let comment = {
+                message: parsedMessage.parameters,
+                author: parsedMessage.tags["display-name"],
+                timestamp: tempTime,
+                color: parsedMessage.tags.color,
+                bot: isBot,
+                command: isCommand,
+            }
+            res.write(`data: ${JSON.stringify(comment)}\n\n`);
+        }
+
+
+        res.on("close", () => {
+            pLog("SSE connection closed", "SSE");
+            res.end()
+        });
+    })
+
 
     app.listen(port, () => {
         pLog("Twitch bot started on port: " + port, "TWITCH")
@@ -142,7 +172,7 @@ function twitchbot() {
                                         } else {
                                             try {
                                                 // console.log(`COMMAND (${new Date().toISOString()}):`, commandObj.name.toUpperCase());
-                                                pLog(`COMMAND executed`, commandObj.name.toUpperCase());
+                                                pLog(`COMMAND (${new Date().toISOString()}):`, commandObj.name.toUpperCase());
                                                 commandObj.execute(parsedMessage, connection);
                                             } catch (err) {
                                                 console.log("ERR:", err);
