@@ -1,7 +1,7 @@
 import './style.scss'
 import escapeHtml from 'escape-html'
-const BASE_IP = "139.162.157.52"
-// const BASE_IP = "localhost"
+// const BASE_IP = "139.162.157.52"
+const BASE_IP = "localhost"
 
 function setupCommentSection() {
     const commentSection = document.querySelector(".chat")
@@ -22,7 +22,7 @@ function appendComment(comment) {
 
 setupCommentSection()
 
-let webSocket = new WebSocket("ws:// " + BASE_IP + ":8412")
+let webSocket = new WebSocket("ws://" + BASE_IP + ":8412")
 
 webSocket.onopen = function (event) {
     console.log("Connected to server")
