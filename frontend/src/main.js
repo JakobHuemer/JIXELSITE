@@ -1,47 +1,41 @@
 import './style.scss'
-
-let tempDate = new Date();
-let localComments = []
 import escapeHtml from 'escape-html'
-
-// const baseUrl = "http://139.162.157.52:3000"
-// const twitchUrl = "http://139.162.157.52:8411"
-const baseUrl = "http://139.162.157.52:3000"
-const twitchUrl = "http://139.162.157.52:8411"
-let lastLocalIndex = -1
-
-// syncing
+const BASE_IP = "139.162.157.52"
+// const BASE_IP = "localhost"
 
 function setupCommentSection() {
     const commentSection = document.querySelector(".chat")
     let localTempDate = new Date();
 
-    let tempStamp = `${localTempDate.getHours()}:${localTempDate.getMinutes()}`
-    let elem = `<div class="chat-message" data-isbot="false" data-iscommand="false"> <span class="timestamp">${tempStamp}</span> <span class="author" style="color: #FF0000">JstJxel</span> <span class="message">Willkommen im Chat</span></div>`
-    commentSection.innerHTML = elem
+    let tempStamp = `${String(localTempDate.getHours()).padStart(2, "0")}:${String(localTempDate.getMinutes()).padStart(2, '0')}`
+    commentSection.innerHTML = `<div class="chat-message" data-isbot="false" data-iscommand="false"> <span class="timestamp">${tempStamp}</span> <span class="author" style="color: #FF0000">JstJxel</span> <span class="message">Willkommen im Chat</span></div>`
 }
-
-setupCommentSection()
-
-//SSE
-
-const eventSource = new EventSource(twitchUrl + "/comment-sync");
 
 function appendComment(comment) {
     let commentContainer = document.querySelector(".chat")
     let localTime = new Date(comment.timestamp)
     console.log(localTime)
-    comment.timestamp = `${localTime.getHours()}:${localTime.getMinutes()}`
+    comment.timestamp = `${String(localTime.getHours()).padStart(2, "0")}:${String(localTime.getMinutes()).padStart(2, '0')}`
     let elem = `<div class="chat-message"> <span class="timestamp">${comment.timestamp}</span> <span class="author" style="color: ${comment.color}">${escapeHtml(comment.author)}</span> <span class="message">${escapeHtml(comment.message)}</span></div>`
     commentContainer.innerHTML += elem
 }
 
-eventSource.onmessage = (event) => {
+setupCommentSection()
+
+let webSocket = new WebSocket("ws:// " + BASE_IP + ":8412")
+
+webSocket.onopen = function (event) {
+    console.log("Connected to server")
+};
+
+webSocket.onmessage = function (event) {
+    console.log(event.data)
     let data = JSON.parse(event.data)
-    appendComment(data)
+
+    if (data.type === "twitch") {
+        appendComment(data.data)
+    }
 }
 
-eventSource.onerror = (event) => {
-console.log("Error")
-    eventSource.close()
-};
+// const baseUrl = "http://" + BASE_IP + ":3000"
+// const twitchUrl = "http://" + BASE_IP + ":8411"
