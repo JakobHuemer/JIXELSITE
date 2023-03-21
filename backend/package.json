@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "twitch": "nodemon twitchbot/twitchbot.js"
+    "twitch": "nodemon twitchbot/src/index.js"
   },
   "author": "",
   "license": "ISC",

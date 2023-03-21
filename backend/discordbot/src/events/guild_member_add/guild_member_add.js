@@ -1,4 +1,4 @@
-let {pLog, pLogErr, cfgData} = require('../../index.js');
+let {pLog, pLogErr, cfgData, discordBot} = require('../../index.js');
 
 module.exports = {
     name: 'guildMemberAdd',
@@ -51,6 +51,7 @@ module.exports = {
             `${User}** has joined. Stay a while and listen!**`,
             `**Roses are red, violets are blue, **${User}** joined this server with you**`,
         ];
+
         let rank_role = member.guild.roles.cache.find((role) => role.id === '984923986624393227');
 
         let human_role = member.guild.roles.cache.find((role) => role.id === '913492240654020668');

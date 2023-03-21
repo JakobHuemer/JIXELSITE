@@ -1,4 +1,3 @@
-
 // DON'T TOUCH THIS CODE BELOW - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 // Parses an IRC message and returns a JSON object with the message's
@@ -6,9 +5,15 @@
 // Expects the caller to pass a single message. (Remember, the Twitch
 // IRC server may send one or more IRC messages in a single message.)
 
-const {pLog} = require('./twitchbot');
+// const { TwitchBot } = require('./index');
+function log(msg, ttvProtocol) {
+    let date = new Date().toISOString();
+    console.log(`[${ date }] TTV ${ ttvProtocol }: ${ msg }`);
+}
 
-function parseMessage(message) {
+// const { TwitchBot } = require('./index');
+
+function parseMessage(message, log) {
 
     let parsedMessage = {  // Contains the component parts.
         tags: null, source: null, command: null, parameters: null
@@ -61,7 +66,7 @@ function parseMessage(message) {
 
     // Parse the command component of the IRC message.
 
-    parsedMessage.command = parseCommand(rawCommandComponent);
+    parsedMessage.command = parseCommand(rawCommandComponent, log);
 
     // Only parse the rest of the components if it's a command
     // we care about; we ignore some messages.
@@ -70,16 +75,17 @@ function parseMessage(message) {
         return null;
     } else {
         if (null != rawTagsComponent) {  // The IRC message contains tags.
-            parsedMessage.tags = parseTags(rawTagsComponent);
+            parsedMessage.tags = parseTags(rawTagsComponent, log);
         }
 
-        parsedMessage.source = parseSource(rawSourceComponent);
+        parsedMessage.source = parseSource(rawSourceComponent, log);
 
         parsedMessage.parameters = rawParametersComponent;
         if (rawParametersComponent && rawParametersComponent[0] === '!') {
             // The user entered a bot command in the chat window.
-            parsedMessage.command = parseParameters(rawParametersComponent, parsedMessage.command);
+            parsedMessage.command = parseParameters(rawParametersComponent, parsedMessage.command, log);
         }
+
     }
 
     return parsedMessage;
@@ -87,7 +93,7 @@ function parseMessage(message) {
 
 // Parses the tags component of the IRC message.
 
-function parseTags(tags) {
+function parseTags(tags, log) {
     // badge-info=;badges=broadcaster/1;color=#0000FF;...
 
     const tagsToIgnore = {  // List of tags to ignore.
@@ -114,7 +120,7 @@ function parseTags(tags) {
                     badges.forEach(pair => {
                         let badgeParts = pair.split('/');
                         dict[badgeParts[0]] = badgeParts[1];
-                    })
+                    });
                     dictParsedTags[parsedTag[0]] = dict;
                 } else {
                     dictParsedTags[parsedTag[0]] = null;
@@ -137,11 +143,11 @@ function parseTags(tags) {
                             let positionParts = position.split('-');
                             textPositions.push({
                                 startPosition: positionParts[0], endPosition: positionParts[1]
-                            })
+                            });
                         });
 
                         dictEmotes[emoteParts[0]] = textPositions;
-                    })
+                    });
 
                     dictParsedTags[parsedTag[0]] = dictEmotes;
                 } else {
@@ -171,10 +177,9 @@ function parseTags(tags) {
 }
 
 
-
 // Parses the command component of the IRC message.
 
-function parseCommand(rawCommandComponent) {
+function parseCommand(rawCommandComponent, log) {
     let parsedCommand = null;
     commandParts = rawCommandComponent.split(' ');
 
@@ -187,44 +192,44 @@ function parseCommand(rawCommandComponent) {
         case 'PRIVMSG':
             parsedCommand = {
                 command: commandParts[0], channel: commandParts[1]
-            }
+            };
             break;
         case 'PING':
             parsedCommand = {
                 command: commandParts[0]
-            }
+            };
             break;
         case 'CAP':
             parsedCommand = {
                 command: commandParts[0], isCapRequestEnabled: (commandParts[2] === 'ACK') ? true : false, // The parameters part of the messages contains the
                 // enabled capabilities.
-            }
+            };
             break;
         case 'GLOBALUSERSTATE':  // Included only if you request the /commands capability.
             // But it has no meaning without also including the /tags capability.
             parsedCommand = {
                 command: commandParts[0]
-            }
+            };
             break;
         case 'USERSTATE':   // Included only if you request the /commands capability.
         case 'ROOMSTATE':   // But it has no meaning without also including the /tags capabilities.
             parsedCommand = {
                 command: commandParts[0], channel: commandParts[1]
-            }
+            };
             break;
         case 'RECONNECT':
-            console.log('The Twitch IRC server is about to terminate the connection for maintenance.')
+            console.log('The Twitch IRC server is about to terminate the webSocketMessageServerConnection for maintenance.');
             parsedCommand = {
                 command: commandParts[0]
-            }
+            };
             break;
         case '421':
-            console.log(`Unsupported IRC command: ${commandParts[2]}`)
+            console.log(`Unsupported IRC command: ${ commandParts[2] }`);
             return null;
         case '001':  // Logged in (successfully authenticated).
             parsedCommand = {
                 command: commandParts[0], channel: commandParts[1]
-            }
+            };
             break;
         case '002':  // Ignoring all other numeric messages.
         case '003':
@@ -235,10 +240,10 @@ function parseCommand(rawCommandComponent) {
         case '375':
         case '376':
             // console.log(`numeric message: ${commandParts[0]}`)
-            pLog(`numeric message: ${commandParts[0]}`, 'TW info')
+            log(`numeric message: ${ commandParts[0] }`, 'TW info');
             return null;
         default:
-            console.log(`\nUnexpected command: ${commandParts[0]}\n`);
+            console.log(`\nUnexpected command: ${ commandParts[0] }\n`);
             return null;
     }
 
@@ -247,7 +252,7 @@ function parseCommand(rawCommandComponent) {
 
 // Parses the source (nick and host) components of the IRC message.
 
-function parseSource(rawSourceComponent) {
+function parseSource(rawSourceComponent, log) {
     if (null == rawSourceComponent) {  // Not all messages contain a source
         return null;
     } else {
@@ -255,14 +260,14 @@ function parseSource(rawSourceComponent) {
         return {
             nick: (sourceParts.length == 2) ? sourceParts[0] : null,
             host: (sourceParts.length == 2) ? sourceParts[1] : sourceParts[0]
-        }
+        };
     }
 }
 
 // Parsing the IRC parameters component if it contains a command (e.g., !dice).
 
-function parseParameters(rawParametersComponent, command) {
-    let idx = 0
+function parseParameters(rawParametersComponent, command, log) {
+    let idx = 0;
     let commandParts = rawParametersComponent.slice(idx + 1).trim();
     let paramsIdx = commandParts.indexOf(' ');
 
@@ -277,4 +282,4 @@ function parseParameters(rawParametersComponent, command) {
     return command;
 }
 
-module.exports = { parseMessage, parseTags, parseCommand, parseSource, parseParameters }
+module.exports = { parseMessage, parseTags, parseCommand, parseSource, parseParameters };

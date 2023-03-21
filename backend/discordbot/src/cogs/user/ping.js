@@ -1,7 +1,7 @@
 const {SlashCommandBuilder} = require('discord.js');
 const {InteractionResponseType} = require('discord-api-types/v10');
 
-let { pLog, pLogErr, cfgData} = require('../../index.js');
+let { pLog, pLogErr, cfgData, discordBot} = require('../../index.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
