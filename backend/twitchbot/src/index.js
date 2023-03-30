@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 
 // const formatDate = (date) => `${ date.getFullYear() }-${ (date.getMonth() + 1).toString().padStart(2, '0') }-${ date.getDate().toString().padStart(2, '0') } ${ date.getHours().toString().padStart(2, '0') }:${ date.getMinutes().toString().padStart(2, '0') }:${ date.getSeconds().toString().padStart(2, '0') }:${ date.getMilliseconds().toString().padStart(3, '0') }`;
-const { formatDate } = require("../../server")
+const { formatDate } = require('../../server');
 
 const { Server: server } = require('ws');
 
@@ -30,7 +30,7 @@ function startWebSocketMessageServer(twitchBot1) {
         });
 
         twitchBot1.webSocketMessageServerConnection.on('close', () => {
-            console.log('Connection closed');
+            twitchBot1.log('Websocket connection closed', 'WSS');
         });
 
         twitchBot1.webSocketMessageServerConnection.broadcast = function (data) {
@@ -38,6 +38,13 @@ function startWebSocketMessageServer(twitchBot1) {
                 client.send(data);
             });
         };
+
+
+        setInterval(() => {
+            twitchBot1.webSocketMessageServerConnection.broadcast(JSON.stringify({
+                'type': 'ping', 'data': 'ping',
+            }));
+        }, 6000);
 
         twitchBot1.sendTwitchMessageWSS = function (parsedMessage) {
 
@@ -65,6 +72,17 @@ function startWebSocketMessageServer(twitchBot1) {
 
 }
 
+// async function getUserId(jakki, twitchBot1) {
+//     axios.get('https://api.twitch.tv/helix/users?login=jakkki_', {
+//         headers: {
+//             'Client-ID': clientId,
+//             'Authorization': 'Bearer ' + await twitchBot1.getBearerToken(),
+//         }
+//     }).then((res) => {
+//         console.log(res.data);
+//     });
+// }
+
 async function connectWebsocketTwitchClient(twitchBot1) {
 
     twitchBot1.log('Connecting to Twitch IRC', 'conn');
@@ -73,7 +91,7 @@ async function connectWebsocketTwitchClient(twitchBot1) {
         console.log('Connect Error: ' + error.toString());
     });
 
-    twitchBot1.webSocketTwitchClient.on('connect', function (connection) {
+    twitchBot1.webSocketTwitchClient.on('connect', async function (connection) {
         // console.log('WebSocket Client Connected');
         twitchBot1.webSocketTwitchClientConnection = connection;
 
@@ -82,13 +100,18 @@ async function connectWebsocketTwitchClient(twitchBot1) {
         // twitchBot1.log('Sending authentication data:\nPASS: ' + twitchBot1.CLIENT_OAUTH_TOKEN + '\nUSERNAME: ' + twitchBot1.USERNAME, 'conn');
         // Send CAP (optional), PASS, and NICK messages
         twitchBot1.webSocketTwitchClientConnection.sendUTF('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership');
-        twitchBot1.webSocketTwitchClientConnection.sendUTF('PASS ' + twitchBot1.CLIENT_OAUTH_TOKEN);
+
+        twitchBot1.webSocketTwitchClientConnection.sendUTF('PASS ' + process.env.TWITCH_CLIENT_OAUTH_TOKEN);
         twitchBot1.webSocketTwitchClientConnection.sendUTF('NICK ' + twitchBot1.USERNAME);
 
+        let pingCount = 0;
         // sending ping message every minute
         setInterval(() => {
             twitchBot1.webSocketTwitchClientConnection.sendUTF('PONG :tmi.twitch.tv');
+            if (pingCount % 20 === 0) {
+            }
             twitchBot1.log('Sending PONG', 'conn');
+            pingCount++;
 
         }, 60000);
 
@@ -108,7 +131,7 @@ async function connectWebsocketTwitchClient(twitchBot1) {
 }
 
 class TwitchBot {
-    constructor(channels, username, clientId, clientSecrete, client_oauth_token, port = 8412) {
+    constructor(channels, username, clientId, clientSecrete, port = 8412) {
         this.PORT = port;
         this.SESSION_DATE = new Date();
 
@@ -125,13 +148,12 @@ class TwitchBot {
         this.USERNAME = username;
         this.CLIENT_ID = clientId;
         this.CLIENT_SECRETE = clientSecrete;
-        this.CLIENT_OAUTH_TOKEN = client_oauth_token;
     }
 
     log(msg, ttvProtocol) {
         // let date = new Date().toISOString();
         let date = new Date();
-        console.log(`[${ formatDate(date) }] TTV ${ ttvProtocol }: ${ msg }`);
+        console.log(`[${ formatDate(date) }] TTV ${ ttvProtocol.toUpperCase().replace(' ', '-') }: ${ msg }`);
     }
 
     logErr(msg, ttvProtocol) {
@@ -153,17 +175,15 @@ class TwitchBot {
     }
 
     sendTwitchMessageWSS(parsedMessage) {
-        this.log('WebSocket not connected', 'WSS');
+        // this.log('WebSocket not connected', 'WSS');
     }
 
     sendTwitchMessage(msg, channel) {
         this.webSocketTwitchClientConnection.sendUTF(`PRIVMSG #${ channel } :${ msg }`);
 
         let parsedMessage = {
-            parameters: msg,
-            tags: {
-                color: '#FF0000',
-                'display-name': this.USERNAME
+            parameters: msg, tags: {
+                color: '#FF0000', 'display-name': this.USERNAME
             }
         };
 
@@ -174,14 +194,27 @@ class TwitchBot {
         this.webSocketTwitchClientConnection.sendUTF(`@reply-parent-msg=${ msgId } PRIVMSG ${ channel } :${ msg }`);
 
         let parsedMessage = {
-            parameters: msg,
-            tags: {
-                color: '#FF0000',
-                'display-name': this.USERNAME
+            parameters: msg, tags: {
+                color: '#FF0000', 'display-name': this.USERNAME
             }
         };
 
         this.sendTwitchMessageWSS(parsedMessage);
+    }
+
+    async getBearerToken() {
+        this.log('Fetching Bearer Token . . .', 'Bearer');
+        const res = await axios.post(
+            'https://id.twitch.tv/oauth2/token',
+            new URLSearchParams({
+                'client_id': this.CLIENT_ID,
+                'client_secret': this.CLIENT_SECRETE,
+                'grant_type': 'client_credentials'
+            })
+        );
+        this.log('Returning Bearer Token . . .', 'Bearer');
+
+        return res.data.access_token;
     }
 }
 

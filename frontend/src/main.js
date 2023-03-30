@@ -1,9 +1,9 @@
 import './style.scss';
 import escapeHtml from 'escape-html';
 
-const BASE_IP = '139.162.157.52';
+// const BASE_IP = '139.162.157.52';
+const BASE_IP = 'localhost';
 
-// const BASE_IP = 'localhost';
 
 function setupCommentSection() {
     const commentSection = document.querySelector('.chat');
@@ -36,8 +36,19 @@ webSocket.onmessage = function (event) {
 
     if (data.type === 'twitch') {
         appendComment(data.data);
+    } else if (data.type === 'ping') {
+        // do nothing just accept the ping
     }
 };
 
-// const baseUrl = "http://" + BASE_IP + ":3000"
-// const twitchUrl = "http://" + BASE_IP + ":8411"
+function notice(pleaseRefreshThePage) {
+    let commentContainer = document.querySelector('.chat');
+    let elem = `<div class="notice"><span>Please refresh the page!</span></div>`;
+    commentContainer.innerHTML += elem;
+}
+
+webSocket.onclose = function (event) {
+    console.log('Connection closed');
+    notice('Please refresh the page!');
+};
+

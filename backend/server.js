@@ -29,7 +29,6 @@ discordBot.start();
 // TWITCH BOT  -------------------------------------------------------------------------
 
 const { TwitchBot } = require('./twitchbot/src/index');
-
 const CHANNELS = [
     'jakkibot'
 ];
@@ -37,9 +36,18 @@ const USERNAME = process.env.TWITCH_CLIENT_USERNAME;
 const OAUTH_TOKEN = process.env.TWITCH_CLIENT_OAUTH_TOKEN;
 const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
-const twitchBot = new TwitchBot(CHANNELS, USERNAME, CLIENT_ID, CLIENT_SECRET, OAUTH_TOKEN, 8412);
+const twitchBot = new TwitchBot(CHANNELS, USERNAME, CLIENT_ID, CLIENT_SECRET, 8412);
 // module.exports = { twitchBot };
 twitchBot.start();
+
+// TWITCH EVENTSUB  -------------------------------------------------------------------------
+
+const { TwitchEventSub } = require('./twitchbot/src/eventsub');
+
+USER_ACCESS_TOKEN = process.env.TWITCH_USER_ACCESS_TOKEN_JIXEL;
+
+const twitchEventSub = new TwitchEventSub(CLIENT_ID, CLIENT_SECRET, 'jstjxel', USER_ACCESS_TOKEN);
+twitchEventSub.start();
 
 
 webApp.use(express.static('./frontend/dist'));
