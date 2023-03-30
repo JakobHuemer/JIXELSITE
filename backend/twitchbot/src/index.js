@@ -63,7 +63,7 @@ function startWebSocketMessageServer(twitchBot1) {
             };
 
             twitchBot1.webSocketMessageServerConnection.broadcast(JSON.stringify({
-                'type': 'twitch', 'data': comment
+                'type': 'twitchmessage', 'data': comment
             }));
         };
 
