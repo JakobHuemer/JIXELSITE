@@ -7,12 +7,12 @@ module.exports = {
     execute(command, twitchBot1) {
         let channel = command.command.channel;
         let msgId = command.tags.id;
-        twitchBot1.sendTwitchMessage(`Banning @${ command.command.botCommandParams }`, this.label);
+        twitchBot1.sendTwitchMessage(`Banning @${ command.command.botCommandParams }`, channel);
     },
 
     help(command, twitchBot1) {
         let channel = command.command.channel;
         let msgId = command.tags.id;
-        twitchBot1.sendTwitchMessage(`Usage: !ban <user>`, this.label);
+        twitchBot1.sendTwitchMessage(`Usage: !ban <user>`, channel);
     }
 };

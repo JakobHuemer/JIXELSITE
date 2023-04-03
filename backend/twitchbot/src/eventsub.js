@@ -20,7 +20,8 @@ class TwitchEventSub {
     }
 
     async stop() {
-        this.eventSubClient.close();
+        this.eventSubClient.abort();
+        this.eventSubClient = new WebSocketClient();
         this.log('WebSocket Client Closed', 'EventSub');
     }
 

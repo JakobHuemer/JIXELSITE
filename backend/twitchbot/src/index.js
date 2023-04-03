@@ -187,6 +187,24 @@ class TwitchBot {
             }
         };
 
+        twitchWebsocketClient.sendUTF(`PRIVMSG #${ channel } :${ msg }`);
+
+        this.sendTwitchMessageWSS(parsedMessage);
+    }
+
+    replyTwitchMessage(msg, channel, msgId) {
+        this.webSocketTwitchClientConnection.sendUTF(`@reply-parent-msg=${ msgId } PRIVMSG ${ channel } :${ msg }`);
+
+        this.sendTwitchMessageWSS(parsedMessage);
+
+        let parsedMessage = {
+            parameters: msg, tags: {
+                color: '#FF0000', 'display-name': this.USERNAME
+            }
+        };
+
+        twitchWebsocketClient.sendUTF(`PRIVMSG #${ channel } :${ msg }`);
+
         this.sendTwitchMessageWSS(parsedMessage);
     }
 
