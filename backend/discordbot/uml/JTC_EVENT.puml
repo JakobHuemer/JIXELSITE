@@ -1,0 +1,69 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+
+:SEQUENCE HANDELING|
+    :check for user switching channel so newChannel && oldChannel}
+    :check for user join channel so !oldChannel && newChannel}
+    :check for user leave channel so !newChannel && oldChannel}
+
+if (user switches channel) then (true)
+    if (user leaves THE JTC channel) then (return)
+        end
+    endif
+    if (user leaves a jtc made channel) then (true)
+        :deleteJtc()]
+    endif
+
+    if (user joins THE JTC channel) then (true)
+        :createJtc()]
+        :return<
+        end
+    endif
+
+
+(false) else if (user joins Channel) then (true)
+    if (user joins THE JTC channel) then (true)
+        :createJtc()]
+    else (false)
+        :return<
+        end
+    endif
+
+
+(false) else if (user leaves channel) then (true)
+    if (user leaves THE JTC channel) then (true)
+        :return<
+        end
+    (false) else if (user leaves a jtc made channel) then (true)
+        :deleteJtc]
+    endif
+endif
+stop
+
+start
+:global deleteJtc()|
+:params:;
+:hostId
+oldChannel
+newChannel}
+
+if (no user in oldChannel) then (true)
+    :delete jtc made channel;
+endif
+stop
+
+
+start
+:global createJtc()|
+:params:;
+:userId}
+
+:setup(userId)|
+
+:create jtc made channel with jtcData from userId;
+:createJtc(userId)]
+
+stop
+@enduml

@@ -70,18 +70,15 @@ class TwitchEventSub {
                         break;
 
                     case 'session_reconnect':
-                        // console.log('Dropped Connection!');
                         this.log('Dropped Connection! Reconnecting . . .', 'conn');
                         this.restart();
                         break;
 
                     case 'revocation':
-                        // console.log('Revoked!');
                         this.log('Revoked!', 'conn');
                         break;
 
                     default:
-                        // console.log('Unknown Message:' + JSON.parse(msg.utf8Data).metadata.message_type);
                         this.log('Unknown Message:' + JSON.parse(msg.utf8Data).metadata.message_type, 'msg');
                         break;
                 }
@@ -98,16 +95,11 @@ class TwitchEventSub {
     }
 
     async getBearerToken() {
-        // this.log('Fetching Bearer Token . . .', 'Bearer');
-        const res = await axios.post(
-            'https://id.twitch.tv/oauth2/token',
-            new URLSearchParams({
-                'client_id': this.TWITCH_CLIENT_ID,
-                'client_secret': this.TWITCH_CLIENT_SECRET,
-                'grant_type': 'client_credentials'
-            })
-        );
-        // this.log('Returning Bearer Token . . .', 'Bearer');
+        const res = await axios.post('https://id.twitch.tv/oauth2/token', new URLSearchParams({
+            'client_id': this.TWITCH_CLIENT_ID,
+            'client_secret': this.TWITCH_CLIENT_SECRET,
+            'grant_type': 'client_credentials'
+        }));
         return res.data.access_token;
     }
 
@@ -115,8 +107,7 @@ class TwitchEventSub {
         const response = await axios.get('https://api.twitch.tv/helix/users', {
             params: {
                 'login': username
-            },
-            headers: {
+            }, headers: {
                 'Authorization': 'Bearer ' + await this.getBearerToken(),
                 'Client-Id': this.TWITCH_CLIENT_ID,
                 'Content-Type': 'application/json',
@@ -135,46 +126,78 @@ class TwitchEventSub {
                 type: 'channel.follow',
                 version: 2,
                 condition: {
-                    broadcaster_user_id: user_id,
-                    moderator_user_id: user_id
+                    broadcaster_user_id: user_id, moderator_user_id: user_id
                 },
-            }
-        ];
+            },
+            {
+                type: 'stream.online',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                },
+            },
+            {
+                type: 'stream.offline',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                },
+            },
+            {
+                type: 'channel.subscribe',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                }
+            },
+            {
+                type: 'channel.subscription.end',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                }
+            },
+            {
+                type: 'channel.subscription.gift',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                }
+            },
+            {
+                type: 'channel.cheer',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                }
+            }];
 
 
         for (let sub of subscriptions) {
 
             let { type, version, condition } = sub;
 
-            // console.log('Subscribing to ' + type + ' (version ' + version + ') . . .');
             this.log('Subscribing to ' + type + ' (version ' + version + ') . . .', 'EventSub Sub');
-            // console.log(JSON.stringify(sub, null, 2))
 
-            let response = await axios.post('https://api.twitch.tv/helix/eventsub/subscriptions',
-                {
-                    'type': type,
-                    'version': version,
-                    'condition': condition,
-                    'transport': {
-                        'method': 'websocket',
-                        session_id,
-                    }
-                },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + this.TWITCH_EVENT_USER_ACCESS_TOKEN,
-                        'Client-Id': this.TWITCH_CLIENT_ID,
-                        'Content-Type': 'application/json'
-                    }
-                }).catch((error) => {
-                console.log(error);
-                // throw error;
+            let response = await axios.post('https://api.twitch.tv/helix/eventsub/subscriptions', {
+                'type': type, 'version': version, 'condition': condition, 'transport': {
+                    'method': 'websocket', session_id,
+                }
+            }, {
+                headers: {
+                    'Authorization': 'Bearer ' + this.TWITCH_EVENT_USER_ACCESS_TOKEN,
+                    'Client-Id': this.TWITCH_CLIENT_ID,
+                    'Content-Type': 'application/json'
+                }
+            }).catch((error) => {
+                this.log(' ------ ✘ Failed to subscribe to ' + type + ' (version ' + version + ')', 'EventSub Sub');
             }).then((response) => {
-                // console.log('✔ Subscribed to ' + type + ' (version ' + version + ')');
                 this.log('✔ Subscribed to ' + type + ' (version ' + version + ')', 'EventSub Sub');
             });
+
         }
     }
 }
 
 module.exports = { TwitchEventSub };
+

@@ -30,7 +30,7 @@ discordBot.start();
 
 const { TwitchBot } = require('./twitchbot/src/index');
 const CHANNELS = [
-    'jakkibot'
+    'jstjxel'
 ];
 const USERNAME = process.env.TWITCH_CLIENT_USERNAME;
 const OAUTH_TOKEN = process.env.TWITCH_CLIENT_OAUTH_TOKEN;

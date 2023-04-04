@@ -1,7 +1,9 @@
 {
   "twitch": {
-    "twitchchat" : "someid",
-    "category": "category_id",
-    "stream_name": "stream_name"
+    "broadcaster": "jstjxel",
+    "title": "title",
+    "category": "category",
+    "status": "online/offline",
+    "viewer": 200
   }
 }

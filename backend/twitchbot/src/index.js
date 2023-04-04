@@ -117,10 +117,10 @@ async function connectWebsocketTwitchClient(twitchBot1) {
 
 
         // Send JOIN messages for each channel
-        twitchBot1.CHANNELS.forEach(channel => {
-            twitchBot1.log(`Joining #${ channel }`, 'conn');
-            twitchBot1.webSocketTwitchClientConnection.sendUTF('JOIN #' + channel);
-            twitchBot1.webSocketTwitchClientConnection.sendUTF(`PRIVMSG #${ channel } :HalloHallo`);
+        twitchBot1.CHANNELS.forEach(subChannel => {
+            twitchBot1.log(`Joining #${ subChannel }`, 'conn');
+            twitchBot1.webSocketTwitchClientConnection.sendUTF('JOIN #' + subChannel);
+            twitchBot1.webSocketTwitchClientConnection.sendUTF(`PRIVMSG #${ subChannel } :HalloHallo`);
         });
 
 
