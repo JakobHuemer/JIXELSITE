@@ -59,6 +59,7 @@ class TwitchEventSub {
                     case 'notification':
                         // console.log('EVENT:', JSON.parse(msg.utf8Data).metadata.subscription_type);
                         this.log(JSON.parse(msg.utf8Data).metadata.subscription_type, 'E');
+                        console.log('EVENT:', JSON.parse(msg.utf8Data));
                         break;
 
                     case 'session_keepalive':
@@ -165,12 +166,20 @@ class TwitchEventSub {
                 }
             },
             {
+                type: 'channel.subscription.message',
+                version: 1,
+                condition: {
+                    broadcaster_user_id: user_id,
+                }
+            },
+            {
                 type: 'channel.cheer',
                 version: 1,
                 condition: {
                     broadcaster_user_id: user_id,
                 }
-            }];
+            },
+        ];
 
 
         for (let sub of subscriptions) {

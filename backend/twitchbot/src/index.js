@@ -110,7 +110,7 @@ async function connectWebsocketTwitchClient(twitchBot1) {
             twitchBot1.webSocketTwitchClientConnection.sendUTF('PONG :tmi.twitch.tv');
             if (pingCount % 20 === 0) {
             }
-            twitchBot1.log('Sending PONG', 'conn');
+            twitchBot1.log('Sending PONG to TWITCH SERVER', 'conn');
             pingCount++;
 
         }, 60000);
@@ -119,7 +119,7 @@ async function connectWebsocketTwitchClient(twitchBot1) {
         // Send JOIN messages for each channel
         twitchBot1.CHANNELS.forEach(subChannel => {
             twitchBot1.log(`Joining #${ subChannel }`, 'conn');
-            twitchBot1.webSocketTwitchClientConnection.sendUTF('JOIN #' + subChannel);
+            twitchBot1.webSocketTwitchClientConnection.sendUTF('JOIN #' + subChannel + '');
             twitchBot1.webSocketTwitchClientConnection.sendUTF(`PRIVMSG #${ subChannel } :HalloHallo`);
         });
 
@@ -187,7 +187,7 @@ class TwitchBot {
             }
         };
 
-        twitchWebsocketClient.sendUTF(`PRIVMSG #${ channel } :${ msg }`);
+        // twitchWebsocketClient.sendUTF(`PRIVMSG #${ channel } :${ msg }\r\n`);
 
         this.sendTwitchMessageWSS(parsedMessage);
     }
@@ -203,7 +203,7 @@ class TwitchBot {
             }
         };
 
-        twitchWebsocketClient.sendUTF(`PRIVMSG #${ channel } :${ msg }`);
+        // twitchWebsocketClient.sendUTF(`PRIVMSG #${ channel } :${ msg }`);
 
         this.sendTwitchMessageWSS(parsedMessage);
     }
@@ -341,7 +341,10 @@ function messageHandler(twitchBot1) {
     twitchBot1.webSocketTwitchClientConnection.on('message', (ircMessage) => {
 
         if (ircMessage.type === 'utf8') {
+
             let rawIrcMessage = ircMessage.utf8Data.trimEnd();
+
+            console.log(rawIrcMessage);
             // console.log(`Message received (${new Date().toISOString()}): '${rawIrcMessage}'\n`);
 
             let messages = rawIrcMessage.split('\r\n');  // The IRC message may contain one or more messages.
@@ -395,7 +398,7 @@ function messageHandler(twitchBot1) {
                         case
                         'PING'
                         :
-                            twitchBot1.log('PING', 'PING');
+                            twitchBot1.log('RECEIVING PING FROM TWITCH SERVER', 'PING');
                             twitchBot1.webSocketTwitchClientConnection.sendUTF('PONG ' + parsedMessage.parameters);
                             break;
                         case
