@@ -1,9 +1,9 @@
 import './style.scss';
 import escapeHtml from 'escape-html';
 
-// const BASE_IP = '139.162.157.52';
+const BASE_IP = '139.162.157.52';
 
-const BASE_IP = 'localhost';
+// const BASE_IP = 'localhost';
 
 
 function setupCommentSection() {
